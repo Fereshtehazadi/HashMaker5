@@ -1,10 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace HashMaker
 {
@@ -15,6 +13,7 @@ namespace HashMaker
         // så att bara ett thread i taget kan anropa get och set
         private static object SyncLock = new Object();
 
+        // hur många thread som är activa (körs)
         private static int activeTreadCount = 0;
         public static int ActiveTreadCount
         {
@@ -34,13 +33,13 @@ namespace HashMaker
             }
         }
         // Run() kör programmet. 
-        public void Run()
+        public void Run() 
         {
             int maxNumberOfRunningThreads = Environment.ProcessorCount - 1;
             int noOfEachThread = 100;
 
             DatabaseManager dbManager = new DatabaseManager();
-            dbManager.init("a");
+            dbManager.Init("a");
 
             // börja på lösenordet där programmet slutade senast (dbManager.NextPassword).
             PasswordGenerator mainPasswordGenerator = 
@@ -55,10 +54,7 @@ namespace HashMaker
 
             while (!Console.KeyAvailable) // så länge är inte en knapp tryckning
             {
-                //string password = passwordGenerator.GetCurrentPassword();
-                //Console.WriteLine(password);
-                //passwordGenerator.NextPassword();
-
+                
                 threadPasswordHashData.Clear();
 
                 // Loop som skapar och kör threads.
@@ -69,6 +65,8 @@ namespace HashMaker
                     // Lägga till en lista av typen <PasswordHashData>
                     //till Dictionary<> threadPasswordHashData.
                     threadPasswordHashData.Add(treadId, new List<PasswordHashData>());
+
+                    // får nuvarande password
                     String currentPassword = mainPasswordGenerator.GetCurrentPassword();
 
                     //Skapa new thread() och tala om vilken funktion
@@ -78,6 +76,7 @@ namespace HashMaker
 
                     // Öka antal aktiva threads med +1 
                     ActiveTreadCount++;
+                    
                     
                     thread.Start();
 
@@ -91,7 +90,7 @@ namespace HashMaker
                 }
 
                 // alla threads har kört klart och skapat hashar i
-                // threadPasswordHashData. Här kommer att slå ihop
+                // threadPasswordHashData<Dictionary>. Här kommer att slå ihop
                 // alla threads listor till en lista.                
                 List<PasswordHashData> totalProcessedPasswords = new List<PasswordHashData>();
 
@@ -104,14 +103,15 @@ namespace HashMaker
                 }
 
                 // Sparar lösenorden och hasharna till databasen
-                dbManager.save(totalProcessedPasswords, 
+                dbManager.Save(totalProcessedPasswords, 
                     mainPasswordGenerator.GetCurrentPassword());
                 // skriver ut hur lång programmet har kommit
                 Console.Write("\rPasswords: {0:N0}\tCurrent password: {1}",
                     dbManager.NoOfProcessedPasswords, dbManager.NextPassword);
-
+              
             }
         }
+        //--------------------------------------------------------------------------------
         // Funktionen som körs av varje thread(createHash()),
         // createHash() Det är en funktion som anropas av alla thread.
         private void createHash(int threadID, // Id för tråden
@@ -161,7 +161,7 @@ namespace HashMaker
                 
              finally
              {
-                // nät thread är färdigt så räknar ner antalet aktiva threads -1
+                // när thread är färdigt så räknar ner antalet aktiva threads -1
                 ActiveTreadCount--;
              }
         }

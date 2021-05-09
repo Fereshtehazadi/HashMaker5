@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace HashMaker
 {
@@ -15,7 +13,7 @@ namespace HashMaker
         SHA384Managed sha384 = null;
         SHA512Managed sha512 = null;
 
-        // Konstruktor initierar de tre field (fält) i klassen
+        // Konstruktor initierar de tre objekt i klassen
         public HashGenerator() 
         {
             sha256 = new SHA256Managed();
@@ -23,8 +21,9 @@ namespace HashMaker
             sha512 = new SHA512Managed();
         }
 
-        // calculateHash() beräkna hars för det lösenordet som finns i 
+        // calculateHash() beräkna hash för det lösenordet som finns i 
         // (passwordHashData.Password)
+        //tar emot ett objekt av klassen PasswordHashData
         public void calculateHash(PasswordHashData passwordHashData)
         {
             // Gör om password till en byte[] med hjälp av Encoding klassen
@@ -40,6 +39,7 @@ namespace HashMaker
         // nedanstående tre funktioner om vandla en byte[] till hash
         public string getHashSha384(byte[] input)
         {
+            
             byte[] hash = sha384.ComputeHash(input);
             return BitConverter.ToString(hash).Replace("-", String.Empty);
         }
